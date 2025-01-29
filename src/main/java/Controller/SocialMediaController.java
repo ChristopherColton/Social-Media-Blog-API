@@ -23,6 +23,7 @@ public class SocialMediaController {
         Javalin app = Javalin.create();
         app.get("/messages", this::getAllMessages);
         app.post("/register", this::createAccount);
+        app.post("/login", this::login);
         return app;
     }
 
@@ -30,13 +31,20 @@ public class SocialMediaController {
      * This is an example handler for an example endpoint.
      * @param context The Javalin Context object manages information about both the HTTP request and response.
      */
-    private void getAllMessages(Context context) {
+    private void createMessage(Context context)
+    {
+
+    }
+
+    private void getAllMessages(Context context) 
+    {
         MessageDAO dao = new MessageDAO();
         List<Message> messages = dao.getAllMessages();
         context.json(messages);
     }
 
-    private void createAccount(Context context) {
+    private void createAccount(Context context) 
+    {
         AccountDAO dao = new AccountDAO();
         Account newAccount = context.bodyAsClass(Account.class);
 
@@ -58,6 +66,32 @@ public class SocialMediaController {
         else
         {
             context.status(400).json("");
+        }
+    }
+
+    private void login(Context context)
+    {
+        AccountDAO dao = new AccountDAO();
+        Account login = context.bodyAsClass(Account.class);
+
+        String username = login.getUsername();
+        String password = login.getPassword();
+
+        if(username == null || password == null)
+        {
+            context.status(400).json("Please provide both a username or password");
+            return;
+        }
+
+        Account loginUser = dao.login(username, password);
+
+        if(loginUser != null)
+        {
+            context.status(200).json(loginUser);
+        }
+        else
+        {
+            context.status(401).json("");
         }
     }
 }

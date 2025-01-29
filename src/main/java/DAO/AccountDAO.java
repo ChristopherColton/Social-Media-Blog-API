@@ -37,9 +37,9 @@ public class AccountDAO
             ps.setString(1, username);
             ps.setString(2, password);
 
-            int rows = ps.executeUpdate();
+            int numInsert = ps.executeUpdate();
 
-            if(rows > 0)
+            if(numInsert > 0)
             {
                 ResultSet rs = ps.getGeneratedKeys();
 
@@ -58,4 +58,35 @@ public class AccountDAO
 
         return null;
     }    
+
+    public Account login(String username, String password)
+    {
+        Connection connection = ConnectionUtil.getConnection();
+        Account account = null;
+
+        try
+        {
+            String loginSql = "SELECT account_id, username, password FROM account WHERE username = ? AND password = ?;";
+            PreparedStatement psLogin = connection.prepareStatement(loginSql);
+
+            psLogin.setString(1, username);
+            psLogin.setString(2, password);
+
+            ResultSet rs = psLogin.executeQuery();
+
+            if(rs.next())
+            {
+                String user = rs.getString("username");
+                String pass = rs.getString("password");
+                int id = rs.getInt("account_id");
+
+                account = new Account(id, user, pass);
+            }
+        }
+        catch(SQLException e)
+        {
+            System.out.println(e.getMessage());
+        }
+        return account;
+    }
 }

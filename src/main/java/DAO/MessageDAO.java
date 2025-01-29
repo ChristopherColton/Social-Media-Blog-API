@@ -9,6 +9,52 @@ import Model.Message;
 
 public class MessageDAO
 {
+    public Message createMessage(String message_text, int posted_by)
+    {
+        Connection connection = ConnectionUtil.getConnection();
+        Message msgCreate = null;
+
+        try
+        {
+            //confirm if user is real
+            String confirmUserSQL = "SELECT * FROM account WHERE account_id = ?;";
+            PreparedStatement confirmUserPS = connection.prepareStatement(confirmUserSQL);
+
+            confirmUserPS.setInt(1, posted_by);
+            ResultSet confirmUserRS = confirmUserPS.executeQuery();
+
+            if(!confirmUserRS.next())
+            {
+                return null;
+            }
+
+            //create-insert message
+            String messageSQL = "INSERT INTO message (message_text, posted_by) VALUES (?, ?);";
+            PreparedStatement ps = connection.prepareStatement(messageSQL);
+            ResultSet rs;
+            ps.setString(1, message_text);
+            ps.setInt(2, posted_by);
+
+            int numInsert = ps.executeUpdate();
+
+            if(numInsert > 0)
+            {
+                rs = ps.getGeneratedKeys();
+
+                if(rs.next())
+                {
+                    int msgNum = rs.getInt(1);
+                    msgCreate = new Message(msgNum, message_text, posted_by);
+                }
+            }
+        }
+        catch(SQLException e)
+        {
+            System.out.println(e.getMessage());
+        }
+        return msgCreate;
+    }
+
     public List<Message> getAllMessages()
     {
         Connection connection = ConnectionUtil.getConnection();
