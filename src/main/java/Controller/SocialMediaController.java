@@ -2,8 +2,10 @@ package Controller;
 
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+import DAO.AccountDAO;
 import DAO.MessageDAO;
 import Model.Message;
+import Model.Account;
 import java.util.List;
 
 /**
@@ -20,7 +22,7 @@ public class SocialMediaController {
     public Javalin startAPI() {
         Javalin app = Javalin.create();
         app.get("/messages", this::getAllMessages);
-
+        app.post("/register", this::createAccount);
         return app;
     }
 
@@ -34,5 +36,28 @@ public class SocialMediaController {
         context.json(messages);
     }
 
+    private void createAccount(Context context) {
+        AccountDAO dao = new AccountDAO();
+        Account newAccount = context.bodyAsClass(Account.class);
 
+        String username = newAccount.getUsername();
+        String password = newAccount.getPassword();
+
+        if(username == null || password == null)
+        {
+            context.status(400).json("Please provide both a username or password");
+            return;
+        }
+
+        Account addAccount = dao.createAccount(username, password);
+
+        if(addAccount != null)
+        {
+            context.status(200).json(addAccount);
+        }
+        else
+        {
+            context.status(400).json("");
+        }
+    }
 }
