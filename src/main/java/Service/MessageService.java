@@ -14,7 +14,6 @@ public class MessageService
 
     public Message createMessage(String message_text, int posted_by, long time_posted_epoch)
     {
-        
         if(message_text == null || message_text.isEmpty() || message_text.length() > 255)
         {
             return null;
@@ -26,5 +25,10 @@ public class MessageService
         }
 
         return messageDAO.createMessage(message_text, posted_by, time_posted_epoch);
+    }
+
+    public Message getMessageById(int message_id)
+    {
+        return messageDAO.getMessageById(message_id);
     }
 }

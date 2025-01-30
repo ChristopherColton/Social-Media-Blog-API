@@ -26,6 +26,7 @@ public class SocialMediaController {
         app.post("/register", this::createAccount);
         app.post("/login", this::login);
         app.post("/messages", this::createMessage);
+        app.get("/messages/{message_id}", this::getMessageById);
         return app;
     }
 
@@ -56,8 +57,8 @@ public class SocialMediaController {
             }
 
             long time_posted_epoch = message.getTime_posted_epoch();
-            MessageService messageService = new MessageService(new MessageDAO());
-            Message createMsg = messageService.createMessage(message.getMessage_text(), message.getPosted_by(), time_posted_epoch);
+            MessageService ms = new MessageService(new MessageDAO());
+            Message createMsg = ms.createMessage(message.getMessage_text(), message.getPosted_by(), time_posted_epoch);
 
             if(createMsg != null)
             {
@@ -80,6 +81,30 @@ public class SocialMediaController {
         MessageDAO dao = new MessageDAO();
         List<Message> messages = dao.getAllMessages();
         context.json(messages);
+    }
+
+    private void getMessageById(Context context)
+    {
+        try
+        {
+            int message_id = Integer.parseInt(context.pathParam("message_id"));
+
+            MessageService ms = new MessageService(new MessageDAO());
+            Message msg = ms.getMessageById(message_id);
+
+            if(msg != null)
+            {
+                context.status(200).json(msg);
+            }
+            else
+            {
+                context.status(200).json("");
+            }
+        }
+        catch(Exception e)
+        {
+            context.status(400).json("");
+        }
     }
 
     private void createAccount(Context context) 
