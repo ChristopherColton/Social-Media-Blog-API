@@ -6,6 +6,7 @@ import DAO.AccountDAO;
 import DAO.MessageDAO;
 import Model.Message;
 import Model.Account;
+import Service.MessageService;
 import java.util.List;
 
 /**
@@ -24,16 +25,54 @@ public class SocialMediaController {
         app.get("/messages", this::getAllMessages);
         app.post("/register", this::createAccount);
         app.post("/login", this::login);
+        app.post("/messages", this::createMessage);
         return app;
     }
 
-    /**
-     * This is an example handler for an example endpoint.
-     * @param context The Javalin Context object manages information about both the HTTP request and response.
-     */
     private void createMessage(Context context)
     {
+        try
+        {
+            if(context.body().isEmpty())
+            {
+                context.status(400).json("");
+                return;
+            }
+        
+            
+            Message message = context.bodyAsClass(Message.class);
+            
 
+            if(message.getMessage_text() == null || message.getMessage_text().isEmpty() || message.getMessage_text().length() > 255)
+            {
+                context.status(400).json("");
+                return;
+            }
+
+            if(message.getPosted_by() <= 0)
+            {
+                context.status(400).json("");
+                return;
+            }
+
+            long time_posted_epoch = message.getTime_posted_epoch();
+            MessageService messageService = new MessageService(new MessageDAO());
+            Message createMsg = messageService.createMessage(message.getMessage_text(), message.getPosted_by(), time_posted_epoch);
+
+            if(createMsg != null)
+            {
+                context.status(200).json(createMsg);
+            }
+            else
+            {
+                context.status(400).json("");
+            }
+
+        }
+        catch(Exception e)
+        {
+            context.status(400).json("");
+        }
     }
 
     private void getAllMessages(Context context) 

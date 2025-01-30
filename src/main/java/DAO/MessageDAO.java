@@ -9,7 +9,7 @@ import Model.Message;
 
 public class MessageDAO
 {
-    public Message createMessage(String message_text, int posted_by)
+    public Message createMessage(String message_text, int posted_by, long time_posted_epoch)
     {
         Connection connection = ConnectionUtil.getConnection();
         Message msgCreate = null;
@@ -29,22 +29,23 @@ public class MessageDAO
             }
 
             //create-insert message
-            String messageSQL = "INSERT INTO message (message_text, posted_by) VALUES (?, ?);";
-            PreparedStatement ps = connection.prepareStatement(messageSQL);
-            ResultSet rs;
+            String messageSQL = "INSERT INTO message (message_text, posted_by, time_posted_epoch) VALUES (?, ?, ?);";
+            PreparedStatement ps = connection.prepareStatement(messageSQL, Statement.RETURN_GENERATED_KEYS);
+            
             ps.setString(1, message_text);
             ps.setInt(2, posted_by);
+            ps.setLong(3, time_posted_epoch);
 
             int numInsert = ps.executeUpdate();
 
             if(numInsert > 0)
             {
-                rs = ps.getGeneratedKeys();
+                ResultSet rs = ps.getGeneratedKeys();
 
                 if(rs.next())
                 {
                     int msgNum = rs.getInt(1);
-                    msgCreate = new Message(msgNum, message_text, posted_by);
+                    msgCreate = new Message(msgNum, posted_by, message_text, time_posted_epoch);
                 }
             }
         }
