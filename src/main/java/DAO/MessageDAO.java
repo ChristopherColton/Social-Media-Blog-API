@@ -142,5 +142,48 @@ public class MessageDAO
 
         return msg;
     }
-}
 
+    public Message updateMessageById(int message_id, String message_text)
+    {
+        Connection connection = ConnectionUtil.getConnection();
+        Message msg = null;
+
+        try 
+        {
+            String sql = "SELECT * FROM message WHERE message_id = ?;";
+            PreparedStatement ps = connection.prepareStatement(sql);
+
+            ps.setInt(1, message_id);
+
+            ResultSet rs = ps.executeQuery();
+
+            if(!rs.next())
+            {
+                return null;
+            }
+            
+            int post = rs.getInt("posted_by");
+            long epoch = rs.getLong("time_posted_epoch");
+
+            String update = "UPDATE message SET message_text = ? WHERE message_id = ?;";
+            PreparedStatement psUpdate = connection.prepareStatement(update);
+
+            psUpdate.setString(1, message_text);
+            psUpdate.setInt(2, message_id);
+
+            int numInsert = psUpdate.executeUpdate();
+            
+            if(numInsert > 0)
+            {
+                msg = new Message(message_id, post, message_text, epoch);
+            }
+            
+        } 
+        catch(Exception e) 
+        {
+            System.out.println(e.getMessage());
+        }
+
+        return msg;
+    }
+}

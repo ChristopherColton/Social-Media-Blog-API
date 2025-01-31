@@ -28,6 +28,7 @@ public class SocialMediaController {
         app.post("/messages", this::createMessage);
         app.get("/messages/{message_id}", this::getMessageById);
         app.delete("/messages/{message_id}", this::deleteMessageById);
+        app.patch("/messages/{message_id}", this::updateMessageById);
         return app;
     }
 
@@ -132,6 +133,38 @@ public class SocialMediaController {
         }
     }
 
+    private void updateMessageById(Context context)
+    {
+        try
+        {
+            int message_id = Integer.parseInt(context.pathParam("message_id"));
+
+            if(context.body().isEmpty())
+            {
+                context.status(400).json("");
+                return;
+            }
+
+            Message updateMsg = context.bodyAsClass(Message.class);
+            String newMsg = updateMsg.getMessage_text();
+            MessageService ms = new MessageService(new MessageDAO());
+            Message updatedMsg = ms.updateMessageById(message_id, newMsg);
+
+            if(updatedMsg != null)
+            {
+                context.status(200).json(updatedMsg);
+            }
+            else
+            {
+                context.status(400).json("");
+            }
+        }
+        catch(Exception e)
+        {
+            context.status(400).json("");
+        }
+    }
+
     private void createAccount(Context context) 
     {
         AccountDAO dao = new AccountDAO();
@@ -182,5 +215,5 @@ public class SocialMediaController {
         {
             context.status(401).json("");
         }
-    }
+    } 
 }
