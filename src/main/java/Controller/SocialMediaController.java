@@ -6,6 +6,7 @@ import DAO.AccountDAO;
 import DAO.MessageDAO;
 import Model.Message;
 import Model.Account;
+import Service.AccountService;
 import Service.MessageService;
 import java.util.List;
 
@@ -184,25 +185,31 @@ public class SocialMediaController {
 
     private void createAccount(Context context) 
     {
-        AccountDAO dao = new AccountDAO();
-        Account newAccount = context.bodyAsClass(Account.class);
-
-        String username = newAccount.getUsername();
-        String password = newAccount.getPassword();
-
-        if(username == null || password == null)
+        try
         {
-            context.status(400).json("Please provide both a username or password");
-            return;
-        }
+            Account newAccount = context.bodyAsClass(Account.class);
 
-        Account addAccount = dao.createAccount(username, password);
+            String username = newAccount.getUsername();
+            String password = newAccount.getPassword();
 
-        if(addAccount != null)
-        {
-            context.status(200).json(addAccount);
+            if(username == null || password == null)
+            {
+                context.status(400).json("Please provide both a username or password");
+                return;
+            }
+            AccountService as = new AccountService(new AccountDAO());
+            Account addAccount = as.createAccount(username, password);
+
+            if(addAccount != null)
+            {
+                context.status(200).json(addAccount);
+            }
+            else
+            {
+                context.status(400).json("");
+            }
         }
-        else
+        catch(Exception e)
         {
             context.status(400).json("");
         }
@@ -210,7 +217,6 @@ public class SocialMediaController {
 
     private void login(Context context)
     {
-        AccountDAO dao = new AccountDAO();
         Account login = context.bodyAsClass(Account.class);
 
         String username = login.getUsername();
@@ -222,11 +228,12 @@ public class SocialMediaController {
             return;
         }
 
-        Account loginUser = dao.login(username, password);
+        AccountService as = new AccountService(new AccountDAO());
+        Account loggedAccount = as.login(username, password);
 
-        if(loginUser != null)
+        if(loggedAccount != null)
         {
-            context.status(200).json(loginUser);
+            context.status(200).json(loggedAccount);
         }
         else
         {
