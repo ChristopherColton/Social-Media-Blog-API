@@ -29,6 +29,7 @@ public class SocialMediaController {
         app.get("/messages/{message_id}", this::getMessageById);
         app.delete("/messages/{message_id}", this::deleteMessageById);
         app.patch("/messages/{message_id}", this::updateMessageById);
+        app.get("/accounts/{account_id}/messages", this::getAllMessagesByUserId);
         return app;
     }
 
@@ -80,9 +81,9 @@ public class SocialMediaController {
 
     private void getAllMessages(Context context) 
     {
-        MessageDAO dao = new MessageDAO();
-        List<Message> messages = dao.getAllMessages();
-        context.json(messages);
+        MessageService ms = new MessageService(new MessageDAO());
+        List<Message> messages = ms.getAllMessages();
+        context.status(200).json(messages);
     }
 
     private void getMessageById(Context context)
@@ -164,6 +165,22 @@ public class SocialMediaController {
             context.status(400).json("");
         }
     }
+
+    private void getAllMessagesByUserId(Context context)
+    {
+        try 
+        {
+            int account_id = Integer.parseInt(context.pathParam("account_id"));
+            MessageService ms = new MessageService(new MessageDAO());
+            List<Message> msg = ms.getAllMessagesByUserId(account_id);
+
+            context.status(200).json(msg);
+        } 
+        catch(Exception e) 
+        {
+            context.status(400).json("");
+        }
+    }  
 
     private void createAccount(Context context) 
     {

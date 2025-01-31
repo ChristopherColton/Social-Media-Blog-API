@@ -2,6 +2,7 @@ package Service;
 
 import Model.Message;
 import DAO.MessageDAO;
+import java.util.List;
 
 public class MessageService 
 {
@@ -45,5 +46,15 @@ public class MessageService
         }
 
         return messageDAO.updateMessageById(message_id, message_text);
+    }
+
+    public List<Message> getAllMessages()
+    {
+        return messageDAO.getAllMessages();
+    }
+
+    public List<Message> getAllMessagesByUserId(int account_id)
+    {
+        return messageDAO.getAllMessagesByUserId(account_id);
     }
 }
